@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {StyleSheet, TextInput, View} from 'react-native';
+import TagalogDictionary from '../resources/TagalogDictionary';
 
 export default class Word extends Component {
   constructor(props) {
@@ -21,6 +22,7 @@ export default class Word extends Component {
     }
     let currentWord =
       this.props.state.guesses[this.props.state.currentGuess] || '';
+    currentWord = currentWord.toUpperCase();
     let startRef = this.inputRefs[0];
     if (currentWord && currentWord.length <= this.props.answer.length) {
       let refIndex = Math.min(currentWord.length, this.props.answer.length - 1);
@@ -50,27 +52,40 @@ export default class Word extends Component {
 
     let keyPressHandler = event => {
       var pressed = event.nativeEvent.key;
-      if (pressed === 'Backspace') {
+      if (pressed === 'Backspace' || pressed === 'Delete') {
         let currentState = this.props.state;
         var currentWord = currentState.guesses[currentState.currentGuess] || '';
+        currentWord = currentWord.toUpperCase();
         if (currentWord.length > 0) {
           currentWord = currentWord.substring(0, currentWord.length - 1);
           currentState.guesses[currentState.currentGuess] = currentWord;
-          this.props.handler(currentState);
         }
+        currentState.status = 'guessing';
+        this.props.handler(currentState);
       }
     };
 
     let endEditingHandler = () => {
       let currentState = this.props.state;
       var currentWord = currentState.guesses[currentState.currentGuess] || '';
-      if (currentWord.length == this.props.answer.length) {
+      currentWord = currentWord.toUpperCase();
+      if (currentWord.length === this.props.answer.length) {
         currentState.guesses[currentState.currentGuess] = currentWord;
-        if (currentWord.toUpperCase() == this.props.answer.toUpperCase()) {
-          currentState.guessed = true;
-          this.props.handler(currentState);
-        } else if (currentState.currentGuess < this.props.guessCount) {
-          currentState.currentGuess++;
+        if (TagalogDictionary.isValidWord(currentWord)) {
+          if (currentWord == this.props.answer.toUpperCase()) {
+            currentState.status = 'guessed';
+            this.props.handler(currentState);
+          } else if (currentState.currentGuess < this.props.guessCount) {
+            currentState.currentGuess++;
+            if (currentState.currentGuess == this.props.guessCount) {
+              currentState.status = 'gameover';
+            } else {
+              currentState.status = 'incorrect';
+            }
+            this.props.handler(currentState);
+          }
+        } else {
+          currentState.status = 'invalid';
           this.props.handler(currentState);
         }
       }
@@ -86,7 +101,7 @@ export default class Word extends Component {
       }
       var backgroundColor = 'lightgrey';
       if (!this.props.editable) {
-        if (letter == this.props.answer.toUpperCase()[i]) {
+        if (letter === this.props.answer.toUpperCase()[i]) {
           backgroundColor = 'darkseagreen';
         } else if (index > -1) {
           backgroundColor = 'yellow';
@@ -95,7 +110,7 @@ export default class Word extends Component {
         backgroundColor = 'aqua';
       }
       var editable = false;
-      if ((letter == '' || i == wordLength - 1) && !focused) {
+      if ((letter === '' || i === wordLength - 1) && !focused) {
         focused = true;
         editable = this.props.editable;
       }
@@ -106,6 +121,7 @@ export default class Word extends Component {
       let ref = React.createRef();
       let element = (
         <TextInput
+          autoFocus
           style={combinedStyles}
           editable={editable}
           onChangeText={handleChange}
@@ -131,10 +147,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   letter: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     color: 'black',
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: 'verdana',
     //fontWeight: 'bold',
     //borderWidth: 0.5,

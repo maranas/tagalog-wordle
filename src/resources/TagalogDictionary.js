@@ -5,11 +5,12 @@ export default class TagalogDictionary {
   static wordCount = TagalogDictionary.wordlist.length;
 
   static getWordOfTheDay() {
-    var index = Math.min(this.dayInYear(), this.wordCount);
+    var yearOffset = Math.floor(this.wordCount/365);
+    var offsetMultiplier = ((new Date()).getFullYear() % yearOffset) + 1;
+    var index = Math.floor(Math.min(this.dayInYear(), this.wordCount) * offsetMultiplier);
     return {
       word: this.wordlist[index],
-      definition: tagalogEnglish[this.wordlist[index]],
-      wordIndex: index,
+      wordIndex: index
     };
   }
 

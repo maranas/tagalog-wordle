@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import Word from './Word';
+import Keyboard from './Keyboard';
+import TagalogDictionary from '../resources/TagalogDictionary';
 
 export default class Grid extends Component {
   constructor(props) {
@@ -14,8 +16,50 @@ export default class Grid extends Component {
     };
   }
 
-  handler = newState => {
-    this.setState(newState);
+  keyPressHandler = keyPressed => {
+    console.log(keyPressed);
+    let status = this.state.status;
+    if (status === 'guessed' || status === 'gameover') {
+      return;
+    }
+    status = 'guessing';
+
+    let newGuesses = this.state.guesses;
+    let currentGuess = this.state.currentGuess;
+    let currentWord = this.state.guesses[this.state.currentGuess] || '';
+
+    if (keyPressed === '⌫') {
+      if (currentWord.length > 0) {
+        currentWord = currentWord.slice(0, -1);
+        newGuesses[this.state.currentGuess] = currentWord;
+      }
+    } else if (keyPressed == '⏎') {
+      if (
+        currentWord.length === this.props.answer.length &&
+        this.props.guessCount > currentGuess
+      ) {
+        if (!TagalogDictionary.isValidWord(currentWord)) {
+          status = 'invalid';
+        } else {
+          currentGuess = currentGuess + 1;
+          if (currentWord === this.props.answer) {
+            status = 'guessed';
+          } else if (currentGuess >= this.props.guessCount) {
+            status = 'gameover';
+          }
+        }
+      }
+    } else if (this.state.currentGuess <= this.props.answer.length) {
+      currentWord = currentWord + keyPressed;
+      newGuesses[this.state.currentGuess] = currentWord;
+    }
+
+    this.setState({
+      guesses: newGuesses,
+      currentGuess: currentGuess,
+      status: status,
+      wordIndex: this.state.wordIndex,
+    });
   };
 
   render() {
@@ -23,18 +67,15 @@ export default class Grid extends Component {
     const words = [];
     for (let i = 0; i < this.props.guessCount; i++) {
       var editable =
-        i == this.state.currentGuess && this.state.status !== 'guessed';
+        i === this.state.currentGuess && this.state.status !== 'guessed';
       if (i < guessesLength) {
         let currentWord = this.state.guesses[i];
         words.push(
           <Word
             word={currentWord}
             answer={this.props.answer || ''}
-            guessCount={this.props.guessCount}
             editable={editable}
             key={i}
-            state={this.state}
-            handler={this.handler}
           />,
         );
       } else {
@@ -42,11 +83,8 @@ export default class Grid extends Component {
           <Word
             word={''}
             answer={this.props.answer || ''}
-            guessCount={this.props.guessCount}
             editable={editable}
             key={i}
-            state={this.state}
-            handler={this.handler}
           />,
         );
       }
@@ -63,15 +101,21 @@ export default class Grid extends Component {
     }
 
     return (
-      <View style={styles.container}>
+      <View>
         <View style={styles.spacer} />
-        <View style={styles.topStatus}>
-          <Text style={styles.wordInfo}>#{this.props.wordIndex}</Text>
-        </View>
-        {words}
-        <View style={styles.bottomStatus}>
-          <Text style={styles.bottomStatusText}>{statusString}</Text>
-        </View>
+        <ScrollView>
+          <View style={styles.container}>
+            <View style={styles.topStatus}>
+              <Text style={styles.wordInfo}>#{this.props.wordIndex}</Text>
+            </View>
+            {words}
+            <View style={styles.bottomStatus}>
+              <Text style={styles.bottomStatusText}>{statusString}</Text>
+            </View>
+          </View>
+        </ScrollView>
+        <Keyboard state={this.state} keyPressHandler={this.keyPressHandler} />
+        <View style={styles.spacer} />
       </View>
     );
   }
@@ -106,7 +150,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   bottomStatus: {
-    height: 100,
+    height: 70,
   },
   bottomStatusText: {
     fontSize: 20,

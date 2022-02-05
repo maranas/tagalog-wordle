@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {KeyboardAvoidingView, ScrollView, StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
 import Grid from './components/Grid';
 import TagalogDictionary from './resources/TagalogDictionary';
 
@@ -23,13 +23,12 @@ export default class App extends Component {
 
   render() {
     return (
-      <ScrollView style={styles.container}>
-        <Grid
-          guessCount={this.state.guessCount}
-          answer={this.state.answer}
-          wordIndex={this.state.wordIndex}
-        />
-      </ScrollView>
+      <Grid
+        style={styles.container}
+        guessCount={this.state.guessCount}
+        answer={this.state.answer}
+        wordIndex={this.state.wordIndex}
+      />
     );
   }
 }

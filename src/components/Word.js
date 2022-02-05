@@ -1,97 +1,11 @@
 import React, {Component} from 'react';
-import {StyleSheet, TextInput, View} from 'react-native';
-import TagalogDictionary from '../resources/TagalogDictionary';
+import {StyleSheet, Text, View} from 'react-native';
 
 export default class Word extends Component {
-  constructor(props) {
-    super(props);
-    this.elements = [];
-    this.inputRefs = [];
-  }
-
-  componentDidMount() {
-    let firstElementRef = this.inputRefs[0];
-    if (firstElementRef && this.props.editable) {
-      firstElementRef.current.focus();
-    }
-  }
-
-  componentDidUpdate() {
-    if (!this.props.editable) {
-      return;
-    }
-    let currentWord =
-      this.props.state.guesses[this.props.state.currentGuess] || '';
-    currentWord = currentWord.toUpperCase();
-    let startRef = this.inputRefs[0];
-    if (currentWord && currentWord.length <= this.props.answer.length) {
-      let refIndex = Math.min(currentWord.length, this.props.answer.length - 1);
-      let focusedRef = this.inputRefs[refIndex];
-      if (focusedRef) {
-        focusedRef.current.focus();
-      }
-    } else if (!currentWord && startRef) {
-      startRef.current.focus();
-    }
-  }
-
   render() {
-    this.elements = [];
-    this.inputRefs = [];
+    let elements = [];
     var wordLength = this.props.answer.length;
 
-    let handleChange = text => {
-      let currentState = this.props.state;
-      var currentWord = currentState.guesses[currentState.currentGuess] || '';
-      if (currentWord.length < wordLength) {
-        currentWord = currentWord + text;
-        currentState.guesses[currentState.currentGuess] = currentWord;
-        this.props.handler(currentState);
-      }
-    };
-
-    let keyPressHandler = event => {
-      var pressed = event.nativeEvent.key;
-      if (pressed === 'Backspace' || pressed === 'Delete') {
-        let currentState = this.props.state;
-        var currentWord = currentState.guesses[currentState.currentGuess] || '';
-        currentWord = currentWord.toUpperCase();
-        if (currentWord.length > 0) {
-          currentWord = currentWord.substring(0, currentWord.length - 1);
-          currentState.guesses[currentState.currentGuess] = currentWord;
-        }
-        currentState.status = 'guessing';
-        this.props.handler(currentState);
-      }
-    };
-
-    let endEditingHandler = () => {
-      let currentState = this.props.state;
-      var currentWord = currentState.guesses[currentState.currentGuess] || '';
-      currentWord = currentWord.toUpperCase();
-      if (currentWord.length === this.props.answer.length) {
-        currentState.guesses[currentState.currentGuess] = currentWord;
-        if (TagalogDictionary.isValidWord(currentWord)) {
-          if (currentWord == this.props.answer.toUpperCase()) {
-            currentState.status = 'guessed';
-            this.props.handler(currentState);
-          } else if (currentState.currentGuess < this.props.guessCount) {
-            currentState.currentGuess++;
-            if (currentState.currentGuess == this.props.guessCount) {
-              currentState.status = 'gameover';
-            } else {
-              currentState.status = 'incorrect';
-            }
-            this.props.handler(currentState);
-          }
-        } else {
-          currentState.status = 'invalid';
-          this.props.handler(currentState);
-        }
-      }
-    };
-
-    let focused = false;
     for (let i = 0; i < wordLength; i++) {
       let letter = '';
       let index = -1;
@@ -109,36 +23,19 @@ export default class Word extends Component {
       } else {
         backgroundColor = 'aqua';
       }
-      var editable = false;
-      if ((letter === '' || i === wordLength - 1) && !focused) {
-        focused = true;
-        editable = this.props.editable;
-      }
       let combinedStyles = StyleSheet.flatten([
         styles.letter,
         {backgroundColor: backgroundColor},
       ]);
-      let ref = React.createRef();
       let element = (
-        <TextInput
-          autoFocus
-          style={combinedStyles}
-          editable={editable}
-          onChangeText={handleChange}
-          onKeyPress={keyPressHandler}
-          onBlur={endEditingHandler}
-          maxLength={1}
-          key={i}
-          ref={ref}
-          focus={editable}
-          value={letter}
-        />
+        <Text style={combinedStyles} key={i}>
+          {letter}
+        </Text>
       );
-      this.elements.push(element);
-      this.inputRefs.push(ref);
+      elements.push(element);
     }
 
-    return <View style={styles.word}>{this.elements}</View>;
+    return <View style={styles.word}>{elements}</View>;
   }
 }
 
@@ -152,9 +49,6 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 28,
     fontFamily: 'verdana',
-    //fontWeight: 'bold',
-    //borderWidth: 0.5,
-    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',

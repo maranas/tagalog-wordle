@@ -17,7 +17,6 @@ export default class Grid extends Component {
   }
 
   keyPressHandler = keyPressed => {
-    console.log(keyPressed);
     let status = this.state.status;
     if (status === 'guessed' || status === 'gameover') {
       return;
@@ -33,7 +32,7 @@ export default class Grid extends Component {
         currentWord = currentWord.slice(0, -1);
         newGuesses[this.state.currentGuess] = currentWord;
       }
-    } else if (keyPressed == '⏎') {
+    } else if (keyPressed === '⏎') {
       if (
         currentWord.length === this.props.answer.length &&
         this.props.guessCount > currentGuess
@@ -114,7 +113,12 @@ export default class Grid extends Component {
             </View>
           </View>
         </ScrollView>
-        <Keyboard state={this.state} keyPressHandler={this.keyPressHandler} />
+        <Keyboard
+          guesses={this.state.guesses}
+          currentGuess={this.state.currentGuess}
+          answer={this.props.answer}
+          keyPressHandler={this.keyPressHandler}
+        />
         <View style={styles.spacer} />
       </View>
     );

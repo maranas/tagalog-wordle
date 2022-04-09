@@ -13,7 +13,8 @@ export default class GameFinishModal extends Component {
         visible={this.props.visible}
         onRequestClose={() => {
           this.props.modalCloseHandler();
-        }}>
+        }}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>{textToDisplay}</Text>

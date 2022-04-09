@@ -43,8 +43,10 @@ export default class Grid extends Component {
           currentGuess = currentGuess + 1;
           if (currentWord === this.props.answer) {
             status = 'guessed';
+            this.props.gameFinishedHandler(true);
           } else if (currentGuess >= this.props.guessCount) {
             status = 'gameover';
+            this.props.gameFinishedHandler(false);
           }
         }
       }
@@ -90,13 +92,13 @@ export default class Grid extends Component {
     }
     var statusString = '';
     if (this.state.status === 'guessed') {
-      statusString = 'You guessed the word!';
+      statusString = '';
     } else if (this.state.status === 'incorrect') {
       //
     } else if (this.state.status === 'invalid') {
       statusString = 'Not in dictionary!';
     } else if (this.state.status === 'gameover') {
-      statusString = "You're out of guesses!";
+      statusString = '';
     }
 
     return (

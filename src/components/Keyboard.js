@@ -22,7 +22,8 @@ export default class Keyboard extends Component {
           style={[styles.button, {backgroundColor: buttonColor}]}
           onPress={event => this.pressHandler(buttonValue)}
           underlayColor={buttonColor}
-          key={buttonValue}>
+          key={buttonValue}
+        >
           <Text style={styles.button}>{buttonValue}</Text>
         </TouchableOpacity>
       );

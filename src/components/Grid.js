@@ -3,72 +3,34 @@ import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import Word from './Word';
 import Keyboard from './Keyboard';
 import TagalogDictionary from '../resources/TagalogDictionary';
+import GridModel from '../models/GridModel';
 
 export default class Grid extends Component {
+  model = new GridModel([], 0, 'guessing', 1);
+
   constructor(props) {
     super(props);
 
-    this.state = {
-      guesses: [],
-      currentGuess: 0,
-      status: 'guessing',
-      wordIndex: 1,
-    };
+    this.state = this.model.getState();
   }
 
   keyPressHandler = keyPressed => {
-    let status = this.state.status;
-    if (status === 'guessed' || status === 'gameover') {
-      return;
+    this.model.letterAdded(
+      keyPressed,
+      this.props.answer,
+      this.props.guessCount,
+    );
+    if (this.model.gameFinished()) {
+      this.props.gameFinishedHandler(this.model.status === 'guessed');
     }
-    status = 'guessing';
-
-    let newGuesses = this.state.guesses;
-    let currentGuess = this.state.currentGuess;
-    let currentWord = this.state.guesses[this.state.currentGuess] || '';
-
-    if (keyPressed === '⌫') {
-      if (currentWord.length > 0) {
-        currentWord = currentWord.slice(0, -1);
-        newGuesses[this.state.currentGuess] = currentWord;
-      }
-    } else if (keyPressed === '⏎') {
-      if (
-        currentWord.length === this.props.answer.length &&
-        this.props.guessCount > currentGuess
-      ) {
-        if (!TagalogDictionary.isValidWord(currentWord)) {
-          status = 'invalid';
-        } else {
-          currentGuess = currentGuess + 1;
-          if (currentWord === this.props.answer) {
-            status = 'guessed';
-            this.props.gameFinishedHandler(true);
-          } else if (currentGuess >= this.props.guessCount) {
-            status = 'gameover';
-            this.props.gameFinishedHandler(false);
-          }
-        }
-      }
-    } else if (this.state.currentGuess <= this.props.answer.length) {
-      currentWord = currentWord + keyPressed;
-      newGuesses[this.state.currentGuess] = currentWord;
-    }
-
-    this.setState({
-      guesses: newGuesses,
-      currentGuess: currentGuess,
-      status: status,
-      wordIndex: this.state.wordIndex,
-    });
+    this.setState(this.model.getState());
   };
 
   render() {
     var guessesLength = this.state.guesses.length;
     const words = [];
     for (let i = 0; i < this.props.guessCount; i++) {
-      var editable =
-        i === this.state.currentGuess && this.state.status !== 'guessed';
+      var editable = this.model.isGuessEditable(i);
       if (i < guessesLength) {
         let currentWord = this.state.guesses[i];
         words.push(
@@ -90,16 +52,6 @@ export default class Grid extends Component {
         );
       }
     }
-    var statusString = '';
-    if (this.state.status === 'guessed') {
-      statusString = '';
-    } else if (this.state.status === 'incorrect') {
-      //
-    } else if (this.state.status === 'invalid') {
-      statusString = 'Not in dictionary!';
-    } else if (this.state.status === 'gameover') {
-      statusString = '';
-    }
 
     return (
       <View>
@@ -111,7 +63,9 @@ export default class Grid extends Component {
             </View>
             {words}
             <View style={styles.bottomStatus}>
-              <Text style={styles.bottomStatusText}>{statusString}</Text>
+              <Text style={styles.bottomStatusText}>
+                {this.state.statusString}
+              </Text>
             </View>
           </View>
         </ScrollView>

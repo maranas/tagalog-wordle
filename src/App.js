@@ -4,47 +4,33 @@ import Grid from './components/Grid';
 import GameFinishModal from './components/GameFinishModal';
 import TagalogDictionary from './resources/TagalogDictionary';
 
+import AppModel from './models/AppModel';
+
 export default class App extends Component {
+  appModel = new AppModel('WORDLE', 6, 0);
+
   constructor(props) {
     super(props);
-
-    this.state = {
-      answer: 'WORDLE',
-      guessCount: 6,
-      wordIndex: 0,
-      modalVisible: false,
-      guessed: false,
-    };
+    this.state = this.appModel.getState();
   }
 
   gameFinishedHandler = guessed => {
-    this.setState({
-      answer: this.state.answer,
-      guessCount: this.state.guessCount,
-      wordIndex: this.state.wordIndex,
-      modalVisible: true,
-      guessed: guessed,
-    });
+    this.appModel.gameFinished(guessed);
+    this.setState(this.appModel.getState());
   };
 
   modalCloseHandler = () => {
-    this.setState({
-      answer: this.state.answer,
-      guessCount: this.state.guessCount,
-      wordIndex: this.state.wordIndex,
-      modalVisible: false,
-      guessed: this.state.guessed,
-    });
+    this.appModel.modalVisible = false;
+    this.setState(this.appModel.getState());
   };
 
   componentDidMount() {
-    this.setState({
-      answer: TagalogDictionary.getWordOfTheDay().word || 'TEST',
-      guessCount: 6,
-      wordIndex: TagalogDictionary.getWordOfTheDay().wordIndex,
-      modalVisible: false,
-      guessed: false,
-    });
+    this.appModel = new AppModel(
+      TagalogDictionary.getWordOfTheDay().word || 'TEST',
+      6,
+      TagalogDictionary.getWordOfTheDay().wordIndex,
+    );
+    this.setState(this.appModel.getState());
   }
 
   render() {

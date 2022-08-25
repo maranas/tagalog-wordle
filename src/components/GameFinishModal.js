@@ -1,23 +1,25 @@
 import React, {Component} from 'react';
 import {Button, StyleSheet, Text, Modal, View, Pressable} from 'react-native';
+import GameFinishModalModel from '../models/GameFinishModalModel';
 
 export default class GameFinishModal extends Component {
   render() {
-    let textToDisplay = this.props.guessed
-      ? 'Wow naman! Nahulaan mo 🎉!'
-      : 'Sayang! Di mo nakuha ☹️';
+    let model = new GameFinishModalModel(
+      this.props.visible,
+      this.props.guessed,
+    );
+
     return (
       <Modal
         animationType="slide"
         transparent={true}
-        visible={this.props.visible}
+        visible={model.visible}
         onRequestClose={() => {
           this.props.modalCloseHandler();
-        }}
-      >
+        }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>{textToDisplay}</Text>
+            <Text style={styles.modalText}>{model.generateDisplayText()}</Text>
             <Button title="OK" onPress={() => this.props.modalCloseHandler()} />
           </View>
         </View>

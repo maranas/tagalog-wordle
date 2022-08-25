@@ -1,3 +1,5 @@
+// wordlist based on:
+// https://github.com/raymelon/tagalog-dictionary-scraper/blob/master/tagalog_dict.txt
 import tagalogEnglish from './tagalogwords.json';
 
 export default class TagalogDictionary {
@@ -7,8 +9,9 @@ export default class TagalogDictionary {
   static getWordOfTheDay() {
     var yearOffset = Math.floor(this.wordCount / 365);
     var offsetMultiplier = (new Date().getFullYear() % yearOffset) + 1;
+    let dayInYear = this.dayInYear();
     var index = Math.floor(
-      Math.min(this.dayInYear(), this.wordCount) * offsetMultiplier,
+      Math.min(dayInYear, this.wordCount) * offsetMultiplier,
     );
     return {
       word: this.wordlist[index],
